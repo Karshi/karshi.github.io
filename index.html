@@ -1,32 +1,232 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AR.js Project</title>
-    <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
-    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>Treasure Hunt AR</title>
+
+  <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v7.0.0/dist/aframe-extras.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #0a0a0f;
+      font-family: 'Georgia', serif;
+      overflow: hidden;
+      height: 100dvh;
+      width: 100dvw;
+    }
+
+    /* ── Loading Screen ── */
+    #loading-screen {
+      position: fixed;
+      inset: 0;
+      background: #0a0a0f;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      gap: 20px;
+      transition: opacity 0.7s ease;
+    }
+    #loading-screen.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+    .emblem {
+      width: 80px; height: 80px;
+      border: 2px solid #c9a84c;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 36px;
+      animation: pulse-glow 2s ease-in-out infinite;
+    }
+    @keyframes pulse-glow {
+      0%,100% { box-shadow: 0 0 12px #c9a84c44; }
+      50%      { box-shadow: 0 0 32px #c9a84c99; }
+    }
+    .loading-title { font-size: 22px; letter-spacing: 0.18em; text-transform: uppercase; color: #c9a84c; }
+    .loading-sub   { font-size: 13px; letter-spacing: 0.1em; color: #8a7a5a; text-transform: uppercase; }
+    .spinner {
+      width: 36px; height: 36px;
+      border: 2px solid #2a2515;
+      border-top-color: #c9a84c;
+      border-radius: 50%;
+      animation: spin 0.9s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── HUD ── */
+    #hud {
+      position: fixed; inset: 0;
+      pointer-events: none; z-index: 100;
+    }
+    .hud-top {
+      position: absolute; top: 0; left: 0; right: 0;
+      padding: 18px 24px 14px;
+      background: linear-gradient(to bottom, rgba(10,10,15,0.85) 0%, transparent 100%);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .hud-title { font-size: 12px; letter-spacing: 0.22em; text-transform: uppercase; color: #c9a84c; }
+    .hud-step  { font-size: 11px; letter-spacing: 0.14em; color: #8a7a5a; text-transform: uppercase; }
+
+    .corner { position: absolute; width: 28px; height: 28px; border-color: #c9a84c55; border-style: solid; }
+    .corner-tl { top: 64px; left: 18px; border-width: 2px 0 0 2px; }
+    .corner-tr { top: 64px; right: 18px; border-width: 2px 2px 0 0; }
+    .corner-bl { bottom: 80px; left: 18px; border-width: 0 0 2px 2px; }
+    .corner-br { bottom: 80px; right: 18px; border-width: 0 2px 2px 0; }
+
+    .scan-hint {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      padding: 12px 24px 28px;
+      background: linear-gradient(to top, rgba(10,10,15,0.85) 0%, transparent 100%);
+      text-align: center;
+    }
+    #scan-hint-text { font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: #8a7a5a; }
+
+    /* ── Clue Banner ── */
+    #clue-banner {
+      position: fixed;
+      bottom: 72px; left: 50%; transform: translateX(-50%) translateY(20px);
+      background: rgba(10,10,15,0.93);
+      border: 1px solid #c9a84c44;
+      padding: 16px 28px; text-align: center;
+      opacity: 0; pointer-events: none; z-index: 200;
+      transition: opacity 0.4s ease, transform 0.4s ease;
+      backdrop-filter: blur(10px);
+      min-width: 260px; max-width: 88vw;
+    }
+    #clue-banner.visible {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+    .banner-eyebrow { font-size: 9px; letter-spacing: 0.3em; text-transform: uppercase; color: #c9a84c; margin-bottom: 8px; }
+    .banner-clue    { font-size: 14px; color: #e8d5a3; line-height: 1.55; }
+  </style>
 </head>
-<body style="margin: 0; overflow: hidden;">
-    <a-scene embedded arjs="sourceType: webcam; detectionMode: mono_and_matrix; matrixCodeType: 3x3;">
-        <!-- Define the 3D model to display when the QR code is detected -->
-        <a-marker type="barcode" value="4">
-            <a-entity
-                gltf-model="scene.gltf"
-                scale="0.1 0.1 0.1"
-                position="0 0 0"
-                rotation="90 0 0">
-            </a-entity>
-        </a-marker>
-        <a-marker type="barcode" value="6">
-            <a-entity
-                gltf-model="scene.gltf"
-                scale="0.1 0.1 0.1"
-                position="0 0 0"
-                rotation="0 90 0">
-            </a-entity>
-        </a-marker>
-        <a-entity camera></a-entity>
-    </a-scene>
+<body>
+
+<!-- Loading Screen -->
+<div id="loading-screen">
+  <div class="emblem">🗺</div>
+  <div class="loading-title">Treasure Hunt</div>
+  <div class="loading-sub">Starting camera…</div>
+  <div class="spinner"></div>
+</div>
+
+<!-- HUD -->
+<div id="hud">
+  <div class="hud-top">
+    <span class="hud-title">Treasure Hunt</span>
+    <span class="hud-step" id="hud-step">Find a marker</span>
+  </div>
+  <div class="corner corner-tl"></div>
+  <div class="corner corner-tr"></div>
+  <div class="corner corner-bl"></div>
+  <div class="corner corner-br"></div>
+  <div class="scan-hint">
+    <span id="scan-hint-text">Point camera at a marker</span>
+  </div>
+</div>
+
+<!-- Clue Banner -->
+<div id="clue-banner">
+  <div class="banner-eyebrow">Follow the guide</div>
+  <div class="banner-clue" id="banner-clue-text"></div>
+</div>
+
+<!--
+  ═══════════════════════════════════════════════════
+  A-FRAME SCENE
+  - imageTargetSrc: single .mind file with ALL markers
+  - maxTrack: 1 — only track 1 marker at a time (best mobile performance)
+  ═══════════════════════════════════════════════════
+-->
+<a-scene
+  id="ar-scene"
+  mindar-image="imageTargetSrc: targets.mind; maxTrack: 1; uiLoading: no; uiScanning: no; uiError: no;"
+  color-space="sRGB"
+  renderer="colorManagement: true; physicallyCorrectLights: true;"
+  vr-mode-ui="enabled: false"
+  device-orientation-permission-ui="enabled: false"
+>
+  <!--
+    Preload all models.
+    You can use the same GLB for every marker if your colleague is
+    the same person everywhere — just change the pointing direction
+    in Blender/Mixamo per export, or use rotation on the a-gltf-model.
+  -->
+  <a-assets>
+    <a-asset-item id="model-0" src="me_bad.glb"></a-asset-item>
+  </a-assets>
+
+  <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+
+  <!--
+    Each anchor's targetIndex matches the image order from the .mind compiler (0-indexed).
+    Rotate the model on Y axis to control which direction the character points
+    relative to the physical marker. 0° = away from camera, 180° = towards camera.
+    Adjust rotation="0 YYY 0" per marker to set the pointing direction.
+  -->
+
+  <!-- MARKER 0 -->
+  <a-entity mindar-image-target="targetIndex: 0" id="anchor-0">
+    <a-gltf-model src="#model-0" position="0 0.3 0" scale="0.4 0.4 0.4"
+      rotation="0 0 0"
+      animation-mixer="clip: Pointing; loop: repeat">
+    </a-gltf-model>
+  </a-entity>
+
+</a-scene>
+
+<script>
+  // ─────────────────────────────────────────────────────────────────
+  // CONFIGURATION
+  // One entry per marker, in the same order images were compiled into
+  // targets.mind. Edit clues and step labels here.
+  // ─────────────────────────────────────────────────────────────────
+  const MARKERS = [
+    { step: 'Marker 1 of 5', clue: 'Head towards the old oak tree near the main entrance.' }
+  ];
+
+  const loadingScreen  = document.getElementById('loading-screen');
+  const clueBanner     = document.getElementById('clue-banner');
+  const bannerClueText = document.getElementById('banner-clue-text');
+  const hudStep        = document.getElementById('hud-step');
+  const scanHintText   = document.getElementById('scan-hint-text');
+
+  let bannerTimer = null;
+
+  function showClue(index) {
+    const marker = MARKERS[index];
+    hudStep.textContent        = marker.step;
+    bannerClueText.textContent = marker.clue;
+    scanHintText.textContent   = 'Guide found!';
+    clueBanner.classList.add('visible');
+    if (bannerTimer) clearTimeout(bannerTimer);
+    bannerTimer = setTimeout(() => {
+      clueBanner.classList.remove('visible');
+      scanHintText.textContent = 'Point camera at the next marker';
+    }, 7000);
+  }
+
+  document.querySelector('a-scene').addEventListener('loaded', () => {
+    loadingScreen.classList.add('hidden');
+
+    MARKERS.forEach((_, i) => {
+      const anchor = document.getElementById(`anchor-${i}`);
+      if (!anchor) return;
+      anchor.addEventListener('targetFound', () => showClue(i));
+      anchor.addEventListener('targetLost',  () => {
+        scanHintText.textContent = 'Point camera at a marker';
+      });
+    });
+  });
+</script>
+
 </body>
 </html>
