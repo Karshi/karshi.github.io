@@ -11,38 +11,17 @@
 
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #0a0a0f; font-family: 'Georgia', serif; overflow: hidden; height: 100dvh; width: 100dvw; }
 
-    body {
-      background: #0a0a0f;
-      font-family: 'Georgia', serif;
-      overflow: hidden;
-      height: 100dvh;
-      width: 100dvw;
-    }
-
-    /* ── Loading Screen ── */
     #loading-screen {
-      position: fixed;
-      inset: 0;
-      background: #0a0a0f;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      z-index: 9999;
-      gap: 20px;
-      transition: opacity 0.7s ease;
+      position: fixed; inset: 0; background: #0a0a0f;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      z-index: 9999; gap: 20px; transition: opacity 0.7s ease;
     }
-    #loading-screen.hidden {
-      opacity: 0;
-      pointer-events: none;
-    }
+    #loading-screen.hidden { opacity: 0; pointer-events: none; }
     .emblem {
-      width: 80px; height: 80px;
-      border: 2px solid #c9a84c;
-      border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 36px;
+      width: 80px; height: 80px; border: 2px solid #c9a84c; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center; font-size: 36px;
       animation: pulse-glow 2s ease-in-out infinite;
     }
     @keyframes pulse-glow {
@@ -52,65 +31,44 @@
     .loading-title { font-size: 22px; letter-spacing: 0.18em; text-transform: uppercase; color: #c9a84c; }
     .loading-sub   { font-size: 13px; letter-spacing: 0.1em; color: #8a7a5a; text-transform: uppercase; }
     .spinner {
-      width: 36px; height: 36px;
-      border: 2px solid #2a2515;
-      border-top-color: #c9a84c;
-      border-radius: 50%;
-      animation: spin 0.9s linear infinite;
+      width: 36px; height: 36px; border: 2px solid #2a2515;
+      border-top-color: #c9a84c; border-radius: 50%; animation: spin 0.9s linear infinite;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* ── HUD ── */
-    #hud {
-      position: fixed; inset: 0;
-      pointer-events: none; z-index: 100;
-    }
+    #hud { position: fixed; inset: 0; pointer-events: none; z-index: 100; }
     .hud-top {
-      position: absolute; top: 0; left: 0; right: 0;
-      padding: 18px 24px 14px;
+      position: absolute; top: 0; left: 0; right: 0; padding: 18px 24px 14px;
       background: linear-gradient(to bottom, rgba(10,10,15,0.85) 0%, transparent 100%);
       display: flex; align-items: center; justify-content: space-between;
     }
     .hud-title { font-size: 12px; letter-spacing: 0.22em; text-transform: uppercase; color: #c9a84c; }
     .hud-step  { font-size: 11px; letter-spacing: 0.14em; color: #8a7a5a; text-transform: uppercase; }
-
     .corner { position: absolute; width: 28px; height: 28px; border-color: #c9a84c55; border-style: solid; }
     .corner-tl { top: 64px; left: 18px; border-width: 2px 0 0 2px; }
     .corner-tr { top: 64px; right: 18px; border-width: 2px 2px 0 0; }
     .corner-bl { bottom: 80px; left: 18px; border-width: 0 0 2px 2px; }
     .corner-br { bottom: 80px; right: 18px; border-width: 0 2px 2px 0; }
-
     .scan-hint {
-      position: absolute; bottom: 0; left: 0; right: 0;
-      padding: 12px 24px 28px;
-      background: linear-gradient(to top, rgba(10,10,15,0.85) 0%, transparent 100%);
-      text-align: center;
+      position: absolute; bottom: 0; left: 0; right: 0; padding: 12px 24px 28px;
+      background: linear-gradient(to top, rgba(10,10,15,0.85) 0%, transparent 100%); text-align: center;
     }
     #scan-hint-text { font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: #8a7a5a; }
 
-    /* ── Clue Banner ── */
     #clue-banner {
-      position: fixed;
-      bottom: 72px; left: 50%; transform: translateX(-50%) translateY(20px);
-      background: rgba(10,10,15,0.93);
-      border: 1px solid #c9a84c44;
-      padding: 16px 28px; text-align: center;
-      opacity: 0; pointer-events: none; z-index: 200;
+      position: fixed; bottom: 72px; left: 50%; transform: translateX(-50%) translateY(20px);
+      background: rgba(10,10,15,0.93); border: 1px solid #c9a84c44;
+      padding: 16px 28px; text-align: center; opacity: 0; pointer-events: none; z-index: 200;
       transition: opacity 0.4s ease, transform 0.4s ease;
-      backdrop-filter: blur(10px);
-      min-width: 260px; max-width: 88vw;
+      backdrop-filter: blur(10px); min-width: 260px; max-width: 88vw;
     }
-    #clue-banner.visible {
-      opacity: 1;
-      transform: translateX(-50%) translateY(0);
-    }
+    #clue-banner.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
     .banner-eyebrow { font-size: 9px; letter-spacing: 0.3em; text-transform: uppercase; color: #c9a84c; margin-bottom: 8px; }
     .banner-clue    { font-size: 14px; color: #e8d5a3; line-height: 1.55; }
   </style>
 </head>
 <body>
 
-<!-- Loading Screen -->
 <div id="loading-screen">
   <div class="emblem">🗺</div>
   <div class="loading-title">Treasure Hunt</div>
@@ -118,7 +76,6 @@
   <div class="spinner"></div>
 </div>
 
-<!-- HUD -->
 <div id="hud">
   <div class="hud-top">
     <span class="hud-title">Treasure Hunt</span>
@@ -133,33 +90,48 @@
   </div>
 </div>
 
-<!-- Clue Banner -->
 <div id="clue-banner">
   <div class="banner-eyebrow">Follow the guide</div>
   <div class="banner-clue" id="banner-clue-text"></div>
 </div>
 
 <!--
-  ═══════════════════════════════════════════════════
-  A-FRAME SCENE
-  - imageTargetSrc: single .mind file with ALL markers
-  - maxTrack: 1 — only track 1 marker at a time (best mobile performance)
-  ═══════════════════════════════════════════════════
+  ═══════════════════════════════════════════════════════════════
+  FIX 1 — JITTER
+  Two parameters control smoothing via the OneEuroFilter:
+
+    filterMinCF (cutoff frequency, default 0.001)
+      → Lower = smoother / less jitter, but more "lag" when moving fast
+      → 0.001 is a good starting point for a static marker on a table
+
+    filterBeta (speed coefficient, default 1000)
+      → Higher = less delay when moving the camera quickly
+      → Lowering it makes movement feel "floaty"
+
+  The values below (filterMinCF:0.001; filterBeta:100) are a good
+  balanced starting point. If still jittery, lower filterMinCF to 0.0005.
+  If the model lags badly when you move, raise filterBeta back up.
+
+  missTolerance:5 means the model stays visible for 5 lost frames
+  before disappearing — prevents flickering on brief tracking loss.
+  ═══════════════════════════════════════════════════════════════
 -->
 <a-scene
   id="ar-scene"
-  mindar-image="imageTargetSrc: targets.mind; maxTrack: 1; uiLoading: no; uiScanning: no; uiError: no;"
+  mindar-image="
+    imageTargetSrc: targets.mind;
+    maxTrack: 1;
+    filterMinCF: 0.001;
+    filterBeta: 100;
+    missTolerance: 5;
+    uiLoading: no; uiScanning: no; uiError: no;
+  "
   color-space="sRGB"
   renderer="colorManagement: true; physicallyCorrectLights: true;"
   vr-mode-ui="enabled: false"
   device-orientation-permission-ui="enabled: false"
 >
-  <!--
-    Preload all models.
-    You can use the same GLB for every marker if your colleague is
-    the same person everywhere — just change the pointing direction
-    in Blender/Mixamo per export, or use rotation on the a-gltf-model.
-  -->
+
   <a-assets>
     <a-asset-item id="model-0" src="me_bad.glb"></a-asset-item>
   </a-assets>
@@ -167,38 +139,85 @@
   <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
   <!--
-    Each anchor's targetIndex matches the image order from the .mind compiler (0-indexed).
-    Rotate the model on Y axis to control which direction the character points
-    relative to the physical marker. 0° = away from camera, 180° = towards camera.
-    Adjust rotation="0 YYY 0" per marker to set the pointing direction.
+    ═══════════════════════════════════════════════════════════════
+    FIX 2 — MODEL POSITIONING
+    The anchor sits flat on the marker, facing up (+Y).
+    Think of the marker as a floor tile.
+
+    position="X  Y  Z"
+      X → left(-) / right(+) of marker centre
+      Y → below(-) / above(+) the marker surface
+      Z → towards camera(-) / away from camera(+)
+
+    For a standing human:
+      position="0 0.5 0"  → floats half a unit above centre ✓
+      position="0 0 0"    → feet buried in the marker
+      position="0 1 0"    → very high above (use for large markers)
+
+    scale="0.4 0.4 0.4"  → all three values must match to avoid squashing
+      Try 0.3–0.6 for a marker the size of an A4 sheet.
+      If the model is huge, go down to 0.1. If tiny, go up to 1.0.
+
+    rotation="0  Y  0"   → spin the character to face the right direction
+      0   = character faces away from camera (pointing into distance)
+      90  = character faces left
+      180 = character faces toward camera
+      270 = character faces right
+      Tweak in 45° increments until the pointing arm aims correctly.
+
+    FIX 3 — ANIMATION
+    The animation-mixer component (from aframe-extras) drives GLB clips.
+
+    Common reasons animations don't play:
+      1. Wrong clip name — the name must exactly match what's in the GLB.
+         Check it at https://gltf-viewer.donmccurdy.com (open the
+         Animations panel on the right). Common Mixamo clip names are
+         "Armature|mixamo.com|Layer0" or just "mixamo.com".
+         Use clip:* to play ALL clips (useful for debugging).
+
+      2. Model is visible but animation-mixer fires before the model
+         loads — fixed below by adding the component via JS on the
+         model-loaded event, not in HTML.
+
+      3. aframe-extras not loaded — confirmed present in <head>.
+
+    The JS below adds animation-mixer safely after the GLB is ready.
+    ═══════════════════════════════════════════════════════════════
   -->
 
-  <!-- MARKER 0 -->
+  <!-- MARKER 0 — note: NO animation-mixer attr here, added in JS below -->
   <a-entity mindar-image-target="targetIndex: 0" id="anchor-0">
-    <a-gltf-model src="#model-0" position="0 0.3 0" scale="0.4 0.4 0.4"
+    <a-gltf-model
+      id="gltf-0"
+      src="#model-0"
+      position="0 0.5 0"
+      scale="0.4 0.4 0.4"
       rotation="0 0 0"
-      animation-mixer="clip: Pointing; loop: repeat">
-    </a-gltf-model>
+    ></a-gltf-model>
   </a-entity>
-
 </a-scene>
 
 <script>
   // ─────────────────────────────────────────────────────────────────
-  // CONFIGURATION
-  // One entry per marker, in the same order images were compiled into
-  // targets.mind. Edit clues and step labels here.
+  // CLUE CONFIG — edit text and step labels here
   // ─────────────────────────────────────────────────────────────────
   const MARKERS = [
-    { step: 'Marker 1 of 5', clue: 'Head towards the old oak tree near the main entrance.' }
+    { step: 'Marker 1 of 5', clue: 'Alpha is the beginning. Omega is the end ... or is it?' }
   ];
+
+  // ─────────────────────────────────────────────────────────────────
+  // ANIMATION CLIP NAME
+  // Change this to match your GLB's animation name exactly.
+  // Use '*' to play all clips (good for testing).
+  // Check the real name at: https://gltf-viewer.donmccurdy.com
+  // ─────────────────────────────────────────────────────────────────
+  const ANIMATION_CLIP = '*';
 
   const loadingScreen  = document.getElementById('loading-screen');
   const clueBanner     = document.getElementById('clue-banner');
   const bannerClueText = document.getElementById('banner-clue-text');
   const hudStep        = document.getElementById('hud-step');
   const scanHintText   = document.getElementById('scan-hint-text');
-
   let bannerTimer = null;
 
   function showClue(index) {
@@ -214,12 +233,26 @@
     }, 7000);
   }
 
+  // FIX 3 — attach animation-mixer AFTER each model finishes loading
+  // This guarantees the component fires at the right time.
+  function attachAnimationMixer(modelEl) {
+    modelEl.addEventListener('model-loaded', () => {
+      modelEl.setAttribute('animation-mixer', `clip: ${ANIMATION_CLIP}; loop: repeat; crossFadeDuration: 0.3`);
+    });
+  }
+
   document.querySelector('a-scene').addEventListener('loaded', () => {
     loadingScreen.classList.add('hidden');
 
     MARKERS.forEach((_, i) => {
-      const anchor = document.getElementById(`anchor-${i}`);
-      if (!anchor) return;
+      const anchor   = document.getElementById(`anchor-${i}`);
+      const modelEl  = document.getElementById(`gltf-${i}`);
+      if (!anchor || !modelEl) return;
+
+      // Attach animation mixer safely after model loads
+      attachAnimationMixer(modelEl);
+
+      // Clue banner events
       anchor.addEventListener('targetFound', () => showClue(i));
       anchor.addEventListener('targetLost',  () => {
         scanHintText.textContent = 'Point camera at a marker';
